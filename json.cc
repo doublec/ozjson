@@ -161,7 +161,9 @@ OZ_BI_define(JSON_decode,1,1)
 
   json_error_t error;
   json_t* root = json_loads(Json, 0, &error);
-  assert(root);
+  if (!root) {
+    OZ_RETURN(OZ_nil());
+  }
 
   OZ_Term oz = json2oz(root);
   json_decref(root);
