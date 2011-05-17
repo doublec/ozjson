@@ -85,7 +85,7 @@ json_t* oz2json(OZ_Term oz)
     r = OZ_boolToC(oz) ? json_true() : json_false();
   }
   else if(OZ_isFloat(oz)) {
-    r = json_real(OZ_float(oz));
+    r = json_real(OZ_floatToC(oz));
   }
   else if(OZ_isInt(oz)) {
     r = json_integer(OZ_intToC(oz));
