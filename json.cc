@@ -74,7 +74,7 @@ OZ_Term json2oz(json_t* json)
 
 json_t* oz2json(OZ_Term oz)
 {
-  json_t* r = json_null();
+  json_t* r = NULL;
   if (OZ_isNil(oz)) {
     r = json_null();
   }
@@ -131,7 +131,11 @@ json_t* oz2json(OZ_Term oz)
     while (!OZ_isNil(arity)) {
       OZ_Term name = OZ_head(arity);
       OZ_Term subtree = OZ_subtree(oz, name);
-      json_object_set_new(a, OZ_atomToC(name), oz2json(subtree));
+      // Pointer returned from OZ_atomToC can be reused
+      // by call to oz2json
+      char* s = strdup(OZ_atomToC(name));
+      json_object_set_new(a, s, oz2json(subtree));
+      free(s);
       arity = OZ_tail(arity);
     }
     r = a;
@@ -140,7 +144,8 @@ json_t* oz2json(OZ_Term oz)
     /* TODO */
     printf("Unknown: %s\n", OZ_atomToC(OZ_termType(oz)));
   }
-  return r;
+
+  return r ? r : json_null();
 }
 
 OZ_BI_define(JSON_encode,1,1)
@@ -151,6 +156,8 @@ OZ_BI_define(JSON_encode,1,1)
   char* s = json_dumps(json, JSON_COMPACT);
   OZ_Term r = OZ_string(s);
   free(s);
+  json_decref(json);
+
   OZ_RETURN(r);
 }
 OZ_BI_end
